@@ -5,6 +5,7 @@ import OAuth from "../../components/OAuth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
 
 //zod validation schema
 const schema = z.object({
@@ -25,13 +26,11 @@ function SignUp() {
     formState: { errors },
   } = useForm({ resolver: zodResolver(schema) });
 
-  const [isError, setError] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const onSubmit = async (formData, e) => {
     e.preventDefault();
-
     setLoading(true);
     try {
       const res = await fetch(
@@ -43,16 +42,19 @@ function SignUp() {
         }
       );
       const data = await res.json();
-      setLoading(false);
-      if (data.succes === false) {
-        setError(true);
+      console.log(data, "data");
+      if (data.status) {
+        toast.success(data?.msg);
+        navigate("/signin");
         return;
+      } else {
+        toast.error(data?.msg);
       }
-      setError(false);
-      navigate("/signin");
     } catch (error) {
+      console.log(error, "err");
+      toast.error("Something went wrong !");
+    } finally {
       setLoading(false);
-      setError(true);
     }
   };
 
@@ -137,9 +139,9 @@ function SignUp() {
                 <Link to={`/signin`}>Sign in</Link>
               </span>
             </p>
-            <p className="text-[10px] text-red-600">
+            {/* <p className="text-[10px] text-red-600">
               {isError && "something went wrong"}
-            </p>
+            </p> */}
           </div>
         </form>
         <div>

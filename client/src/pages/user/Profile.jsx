@@ -9,6 +9,9 @@ import Favorites from "./Favorites";
 import { IoArrowBackCircleSharp } from "react-icons/io5";
 import { showSidebarOrNot } from "../../redux/adminSlices/adminDashboardSlice/DashboardSlice";
 import { IoMenu } from "react-icons/io5";
+import AllVehiclesofSameModel from "./AllVehiclesofSameModel";
+import VendorCarList from "./VendorCarList";
+import VendorAddProductModal from "../vendor/Components/VendorAddVehilceModal";
 
 function Profile() {
   const { isError } = useSelector((state) => state.user);
@@ -31,8 +34,6 @@ function Profile() {
 
       <div>
         <div className="flex  relative dark:bg-main-dark-bg">
-         
-
           {activeMenu ? (
             <div className="w-72 bg-white  fixed sidebar dark:bg-secondary-dark-bg">
               <UserProfileSidebar />
@@ -71,7 +72,8 @@ function Profile() {
             <div className="main_section mx-8 lg:min-w-[900px] ">
               <Routes>
                 <Route path="/" element={<UserProfileContent />} />
-                <Route path="/profiles" element={<UserProfileContent />} />
+                <Route path="/myvehicles" element={<VendorCarList />} />
+                <Route path="/addvehicles" element={<VendorAddProductModal />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/favorites" element={<Favorites />} />
               </Routes>

@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setCompanyData, setDistrictData, setLocationData, setModelData } from "../redux/adminSlices/adminDashboardSlice/CarModelDataSlice";
+import {
+  setCompanyData,
+  setDistrictData,
+  setLocationData,
+  setModelData,
+} from "../redux/adminSlices/adminDashboardSlice/CarModelDataSlice";
 import { setWholeData } from "../redux/user/selectRideSlice";
 
 const useFetchLocationsLov = () => {
@@ -10,6 +15,7 @@ const useFetchLocationsLov = () => {
   const fetchLov = async () => {
     try {
       setIsLoading(true);
+
       const res = await fetch("/api/admin/getVehicleModels", {
         method: "GET",
         headers: {
@@ -18,34 +24,29 @@ const useFetchLocationsLov = () => {
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const data: any = await res.json();
+        console.log(data);
 
-        //getting models from data
-        const models = data.filter((cur) => cur.type === "car").map((cur) => cur.model);
+        // cars array
+        const cars = data.cars || [];
+        const models = cars.map((cur) => cur.model);
         dispatch(setModelData(models));
 
-        //getting comapnys from data
-        const brand = data.filter((cur) => cur.type === "car").map((cur) => cur.brand);
-        const uniqueBrand = brand.filter((cur, index) => {
-          return brand.indexOf(cur) === index;
-        });
-        dispatch(setCompanyData(uniqueBrand));
+        const brands = cars.map((cur) => cur.brand);
+        const uniqueBrands = [...new Set(brands)];
+        dispatch(setCompanyData(uniqueBrands));
 
-        //getting locations from data
-        const locations = data.filter((cur) => cur.type === "location").map((cur) => cur.location);
+        // locations array
+        const locationsArr = data.locations || [];
+        const locations = locationsArr.map((cur) => cur.location);
         dispatch(setLocationData(locations));
 
-        //getting districts from data
-        const districts = data.filter((cur) => cur.type === "location").map((cur) => cur.district);
-        const uniqueDistricts = districts.filter((cur, idx) => {
-          return districts.indexOf(cur) === idx;
-        });
+        const districts = locationsArr.map((cur) => cur.district);
+        const uniqueDistricts = [...new Set(districts)];
         dispatch(setDistrictData(uniqueDistricts));
 
-        //setting whole data
-        const wholeData = data.filter((cur) => cur.type === "location");
-        dispatch(setWholeData(wholeData));
-
+        // whole data (locations)
+        dispatch(setWholeData(locationsArr));
       } else {
         return "no data found";
       }

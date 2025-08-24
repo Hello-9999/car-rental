@@ -31,6 +31,15 @@ import AllVehiclesofSameModel from "./pages/user/AllVehiclesofSameModel";
 import AddProductModal from "./pages/admin/components/AddProductModal";
 import VendorAddProductModal from "./pages/vendor/Components/VendorAddVehilceModal";
 import CarNotFound from "./pages/user/CarNotFound";
+import VerifyEmail from "./pages/user/VerifyEmail";
+// import VerifyOtp from "./pages/user/VerifyOtp";
+// import VerifyEmail from "./pages/user/VerifyEmail";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import SuccessPage from "./pages/user/SuccessEsewa";
+import SuccessEsewa from "./pages/user/SuccessEsewa";
+import FailureEsewa from "./pages/user/FailureEsewa";
+import PaymentReturn from "./pages/user/PaymentReturn";
 
 function App() {
   return (
@@ -38,13 +47,16 @@ function App() {
       <BrowserRouter>
         {/* <ThemeProvider theme={theme}> */}
         <Routes>
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          {/* <Route path="/verify-otp" element={<VerifyOtp />} />
+           */}
           {/* if user enter wrong url show this page */}
           <Route path="*" element={<CarNotFound />} />
           {/* components with Navbar */}
           <Route element={<With_nav />}>
             <Route path="/" element={<Home />} />
             <Route path="/vehicles" element={<Vehicles />} />
-            <Route path="/enterprise" element={<Enterprise />} />
+            {/* <Route path="/enterprise" element={<Enterprise />} /> */}
             <Route path="/contact" element={<Contact />} />
           </Route>
 
@@ -54,8 +66,8 @@ function App() {
             <Route element={<PrivateSignin />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/vendorSignin" element={<VendorSignin />} />
-              <Route path="/vendorSignup" element={<VendorSignup />} />
+              {/* <Route path="/vendorSignin" element={<VendorSignin />} />
+              <Route path="/vendorSignup" element={<VendorSignup />} /> */}
             </Route>
           </Route>
 
@@ -68,10 +80,15 @@ function App() {
             <Route path="/availableVehicles" element={<AvailableVehicles />} />
             <Route path="/checkoutPage" element={<CheckoutPage />} />
             <Route path="/razorpay" element={<Razorpay />} />
+            <Route path="/return-url" element={<PaymentReturn />} />
+            <Route
+              path="/profile/vendorEdit/*"
+              element={<VendorEditProductComponent />}
+            />
           </Route>
 
           {/* vendor private routes */}
-          <Route element={<VendorPrivateRoute />}>
+          {/* <Route element={<VendorPrivateRoute />}>
             <Route path="/vendorDashboard/*" element={<VendorDashboard />} />
             <Route
               path="/vendorDashboard/vendorEditProductComponent"
@@ -85,7 +102,7 @@ function App() {
               path="vendorDashboard/vendorAddProduct"
               element={<VendorAddProductModal />}
             />
-          </Route>
+          </Route> */}
 
           {/* admin private routes */}
 
@@ -105,6 +122,18 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+
+      <ToastContainer
+        autoClose={5000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </>
   );
 }

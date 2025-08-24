@@ -9,11 +9,11 @@ export const navLinks = [
       title: "Vehicles",
       path:'/vehicles',
     },
-    {
-      id: "2",
-      title: "Enterprise",
-      path:'/enterprise'
-    },
+    // {
+    //   id: "2",
+    //   title: "Enterprise",
+    //   path:'/enterprise'
+    // },
     {
       id:'3',
       title: "Contact",

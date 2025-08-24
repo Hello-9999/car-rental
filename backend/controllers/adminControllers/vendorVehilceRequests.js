@@ -1,31 +1,27 @@
+import pool from "../../db.js";
 import Vehicle from "../../models/vehicleModel.js";
 import { errorHandler } from "../../utils/error.js";
 
 //Vendor vehicle request
 export const fetchVendorVehilceRequests = async (req, res, next) => {
   try {
-    const vendorRequests = await Vehicle.aggregate([
-      {
-        $match: {
-          isAdminApproved: false,
-          isDeleted: "false",
-          isRejected: false,
-          isAdminAdded: false,
-        },
-      },
-    ]);
+    // ✅ MySQL Query (select all vehicles where conditions are false)
+    const [vendorRequests] = await pool.execute(
+      `SELECT * FROM vehicles 
+       WHERE isAdminApproved = 0 
+       AND isDeleted = 0 
+       AND isRejected = 0 
+       AND isAdminAdded = 0`
+    );
 
-    if (!vendorRequests) {
-      next(
-        errorHandler(500, "something went wrong while fetching vendor requests")
-      );
+    if (!vendorRequests || vendorRequests.length === 0) {
+      return next(errorHandler(404, "No vendor requests found"));
     }
-    if (vendorRequests) {
-      res.status(200).json(vendorRequests);
-    }
+
+    res.status(200).json(vendorRequests);
   } catch (error) {
     console.log(error);
-    next(errorHandler(500, "error while fetchVendorVehicleRequests"));
+    next(errorHandler(500, "Error while fetching vendor vehicle requests"));
   }
 };
 
@@ -34,27 +30,33 @@ export const fetchVendorVehilceRequests = async (req, res, next) => {
 export const approveVendorVehicleRequest = async (req, res, next) => {
   try {
     if (!req.body) {
-      next(errorHandler(409, "no body found bad request"));
+      return next(errorHandler(400, "No request body found"));
     }
 
     const { _id } = req.body;
-
-    const approvedVendor = await Vehicle.findByIdAndUpdate(
-      _id,
-      { isAdminApproved: true },
-      {
-        new: true,
-      }
-    );
-
-    if (!approvedVendor) {
-      next(errorHandler(500, "something went wrong while approveing vendor"));
+    if (!_id) {
+      return next(errorHandler(400, "Vehicle ID (_id) is required"));
     }
 
-    res.status(200).json(approvedVendor);
+    // Update isAdminApproved to true for the given vehicle ID
+    const [result] = await pool.execute(
+      `UPDATE vehicles SET isAdminApproved = 1 WHERE id = ?`,
+      [_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return next(errorHandler(404, "Vehicle not found or already approved"));
+    }
+
+    // Optionally, fetch the updated record to return
+    const [rows] = await pool.execute(`SELECT * FROM vehicles WHERE id = ?`, [
+      _id,
+    ]);
+
+    res.status(200).json(rows[0]);
   } catch (error) {
-    console.log(error);
-    next(errorHandler(500, "error while approveing vendor"));
+    console.error(error);
+    next(errorHandler(500, "Error while approving vendor vehicle"));
   }
 };
 
@@ -62,23 +64,32 @@ export const approveVendorVehicleRequest = async (req, res, next) => {
 export const rejectVendorVehicleRequest = async (req, res, next) => {
   try {
     if (!req.body) {
-      next(errorHandler(409, "bad request required id"));
+      return next(errorHandler(400, "Bad request: required id"));
     }
+
     const { _id } = req.body;
-    const regectedVendor = await Vehicle.findByIdAndUpdate(
-      _id,
-      { isRejected: true },
-      {
-        new: true,
-      }
+    if (!_id) {
+      return next(errorHandler(400, "Vehicle ID (_id) is required"));
+    }
+
+    // Update isRejected to true for the given vehicle ID
+    const [result] = await pool.execute(
+      `UPDATE vehicles SET isRejected = 1 WHERE id = ?`,
+      [_id]
     );
 
-    if (!regectedVendor) {
-      next(errorHandler(500, "something went wrong while regecting vendor"));
+    if (result.affectedRows === 0) {
+      return next(errorHandler(404, "Vehicle not found or already rejected"));
     }
 
-    res.status(200).json(regectedVendor);
+    // Optionally, fetch the updated record to return
+    const [rows] = await pool.execute(`SELECT * FROM vehicles WHERE id = ?`, [
+      _id,
+    ]);
+
+    res.status(200).json(rows[0]);
   } catch (error) {
-    next(errorHandler(500, "error while Rejecting"));
+    console.error(error);
+    next(errorHandler(500, "Error while rejecting vendor vehicle"));
   }
 };

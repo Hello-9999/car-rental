@@ -52,7 +52,7 @@ const vehicleSchema = new mongoose.Schema({
     required: false,
   },
   rating: {
-    type: ["1", "2", "3", "4", "5"],
+    type: ["1", "2", "3", "4", "5","more"],
     requrired:false,
   },
   seats: {

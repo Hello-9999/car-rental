@@ -11,18 +11,31 @@ import { TooltipComponent } from "@syncfusion/ej2-react-popups";
 import { MdOutlineCancel } from "react-icons/md";
 import { links } from "./UserSidebarContent";
 import { showSidebarOrNot } from "../redux/adminSlices/adminDashboardSlice/DashboardSlice";
-import { CiLogout } from "react-icons/ci";
-
+import { CiLogout, CiUser } from "react-icons/ci";
+import toast from "react-hot-toast";
 
 const UserProfileSidebar = () => {
   const { activeMenu, screenSize } = useSelector(
     (state) => state.adminDashboardSlice
   );
 
-  const { currentUser, isLoading } = useSelector(
-    (state) => state.user
+  console.log(
+    links[0]?.links.filter((del) => del?.to !== "myvehicles" && "addvehicles"),
+    "links"
   );
 
+  const { currentUser, isLoading } = useSelector((state) => state.user);
+  // const verified
+
+  // console.log(currentUser?.isVendor);
+  console.log(currentUser, "currentUser");
+
+  const userLinks =
+    currentUser?.isVendor == 0
+      ? links[0]?.links.filter(
+          (del) => del?.to !== "myvehicles" && del?.to !== "addvehicles"
+        )
+      : links[0]?.links.filter((del) => del);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -34,12 +47,24 @@ const UserProfileSidebar = () => {
 
   //SignOut
   const handleSignout = async () => {
-    const res = await fetch("/api/admin/signout", {
-      method: "GET",
-      credentials:'include'
+    const res = await fetch("/api/auth/signout", {
+      method: "POST",
+      credentials: "include",
     });
     const data = await res.json();
+
     if (data) {
+      toast.error(data?.msg || "Logged Out", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: 1,
+        theme: "light",
+        transition: "Flip",
+      });
       dispatch(signOut());
       navigate("/signin");
     }
@@ -79,61 +104,53 @@ const UserProfileSidebar = () => {
             <TooltipComponent content={"menu"} position="BottomCenter">
               <button
                 className="text-xl rounded-full p-3 mt-4 block  hover:bg-gray-500"
-                onClick={() => {dispatch(showSidebarOrNot(false))}}
+                onClick={() => {
+                  dispatch(showSidebarOrNot(false));
+                }}
               >
                 <MdOutlineCancel />
               </button>
             </TooltipComponent>
           </div>
           <div className="mt-10">
-            {links.map((cur, idx) => (
-              <div key={idx}>
-                {cur.links.map((link) => (
-                  <NavLink
-                    to={`/profile/${link.name}`}
-                    key={link.name}
-                    onClick={() => {
-                      if (screenSize <= 900 && activeMenu) {
-                        dispatch(showSidebarOrNot(false));
-                      }
-                    }}
-                    className={({ isActive }) =>
-                      isActive ? activeLink : normalLink
-                    }
-                  >
-                    {link.icon}
-                    <span className="capitalize text-gray-600">
-                      {link.name}
-                    </span>
-                  </NavLink>
-                ))}
-              </div>
+            {userLinks.map((link) => (
+              <NavLink
+                to={`/profile/${link.to}`}
+                key={link.name}
+                onClick={() => {
+                  if (screenSize <= 900 && activeMenu) {
+                    dispatch(showSidebarOrNot(false));
+                  }
+                }}
+                className={({ isActive }) =>
+                  isActive ? activeLink : normalLink
+                }
+              >
+                {link.icon}
+                <span className="capitalize text-gray-600">{link.name}</span>
+              </NavLink>
             ))}
 
             <div className="flex flex-col gap-y-5">
-
-            <div className="flex items-center mt-10 gap-2">
+              <div className="flex items-center mt-10 gap-2">
                 <button
                   type="button"
                   className="ml-4 text-red-400"
                   onClick={handleSignout}
                 >
-                  SignOut
+                  Log Out
                 </button>
                 <CiLogout />
               </div>
-              <div className="ml-4">
-              <button
-                className="text-red-400"
-                onClick={handleDelete}
-                type="button"
-              >
-                {isLoading ? "Loading..." : "Delete User"}
-              </button>
-              </div>
-              
-
-              
+              {/* <div className="ml-4">
+                <button
+                  className="text-red-400"
+                  onClick={handleDelete}
+                  type="button"
+                >
+                  {isLoading ? "Loading..." : "Delete User"}
+                </button>
+              </div> */}
             </div>
           </div>
         </>

@@ -346,19 +346,24 @@ export const showVehicles = async (req, res, next) => {
 export const deleteVehicle = async (req, res, next) => {
   try {
     const vehicle_id = req.params.id;
+
     if (!vehicle_id) {
-      return;
+      return res.status(400).json({ message: "Vehicle ID is required" });
     }
 
-    const deleted = await Vehicle.findByIdAndUpdate(vehicle_id, {
-      isDeleted: true,
-    });
-    if (!deleted) {
-      return next(500, "not able to delete");
+    const [result] = await pool.execute(
+      "UPDATE vehicles SET isDeleted = 1 WHERE id = ?",
+      [vehicle_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Vehicle not found" });
     }
-    res.status(200).json({ message: "deleted successfully" });
+
+    res.status(200).json({ message: "Deleted successfully" });
   } catch (error) {
-    next(errorHandler(500, "something went wrong"));
+    console.error(error);
+    next(errorHandler(500, "Something went wrong"));
   }
 };
 

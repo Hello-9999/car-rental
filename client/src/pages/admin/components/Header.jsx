@@ -25,9 +25,9 @@ const Header = ({category,title}) => {
         {title}
       </p>
       </div>
-      <button className='bg-blue-600 rounded-lg '>
+      {/* <button className='bg-blue-600 rounded-lg '>
         <div className='text-white px-5 py-2 font-bold ' onClick={handleAddVehicle}>Add+</div>
-      </button>
+      </button> */}
       
         
     </div>

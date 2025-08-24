@@ -18,7 +18,7 @@ const SideBar = () => {
 
   const activeLink =
     "flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg text-black bg-blue-50 text-md  m-2";
-    //in normal mode there was dark:text-gray-200 i removed it
+  //in normal mode there was dark:text-gray-200 i removed it
   const normalLink =
     "flex items-center gap-5 pl-4 pt-3 pb-2.5 rounded-lg  text-md text-gray-700   dark:hover:text-black hover:bg-slate-100 m-2";
 
@@ -59,7 +59,9 @@ const SideBar = () => {
           <div className="mt-10">
             {links.map((cur, idx) => (
               <div key={idx}>
-                <p className="text-gray-700 m-3 mt-4 text-uppercase">{cur.title}</p>
+                <p className="text-gray-700 m-3 mt-4 text-uppercase">
+                  {cur.title}
+                </p>
                 {cur.links.map((link) => (
                   <NavLink
                     to={`/adminDashboard/${link.name}`}
@@ -74,7 +76,9 @@ const SideBar = () => {
                     }
                   >
                     {link.icon}
-                    <span className="capitalize text-gray-600">{link.name}</span>
+                    <span className="capitalize text-gray-600">
+                      {link.label}
+                    </span>
                   </NavLink>
                 ))}
               </div>

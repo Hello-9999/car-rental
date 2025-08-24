@@ -44,11 +44,11 @@ function AdminDashNew() {
             <Routes>
               <Route path="/" element={<AdminHomeMain/>}/>
               <Route path="/adminHome" element={<AdminHomeMain />} />
-              <Route path="/allProduct" element={<AllVehicles />} />
+              <Route path="/allvehicles" element={<AllVehicles />} />
               <Route path="/allUsers" element={<AllUsers />} />
               <Route path="/allVendors" element={<AllVendors />} />
-              <Route path="/calender" element={<Calender />} />
-              <Route path="/colorPicker" element={<ColorPicker />} />
+              {/* <Route path="/calender" element={<Calender />} />
+              <Route path="/colorPicker" element={<ColorPicker />} /> */}
               <Route path="/customers" element={<Customers />} />
               <Route path="/editor" element={<Editor />} />
               <Route path="/vendorVehicleRequests" element={<VenderVehicleRequests />} />

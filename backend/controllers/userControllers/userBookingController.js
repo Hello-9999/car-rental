@@ -5,6 +5,9 @@ import Razorpay from "razorpay";
 import { availableAtDate } from "../../services/checkAvailableVehicle.js";
 import Vehicle from "../../models/vehicleModel.js";
 import nodemailer from "nodemailer";
+import pool from "../../db.js";
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const BookCar = async (req, res, next) => {
   try {
@@ -60,15 +63,16 @@ export const razorpayOrder = async (req, res, next) => {
     const { totalPrice, dropoff_location, pickup_district, pickup_location } =
       req.body;
 
-    console.log(totalPrice)
+    console.log(totalPrice);
     if (
       !totalPrice ||
       !dropoff_location ||
       !pickup_district ||
       !pickup_location
     ) {
-
-      return next(errorHandler(400, "Missing Required Feilds Process Cancelled")) ;
+      return next(
+        errorHandler(400, "Missing Required Feilds Process Cancelled")
+      );
     }
     const instance = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
@@ -87,6 +91,22 @@ export const razorpayOrder = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     next(errorHandler(500, "error occured in razorpayorder"));
+  }
+};
+
+export const createPaymentIntent = async (req, res) => {
+  try {
+    const { amount, currency = "npr" } = req.body;
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // convert to cents
+      currency,
+    });
+
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Payment failed" });
   }
 };
 
@@ -208,69 +228,67 @@ export const showOneofkind = async (req, res, next) => {
 
 //  filtering vehicles
 export const filterVehicles = async (req, res, next) => {
+  console.log(req.body, "reqreq");
   try {
-    if (!req.body) {
-      next(errorHandler(401, "bad request no body"));
-      return;
+    const filters = req.body;
+    if (!filters || filters.length === 0) {
+      return next(errorHandler(400, "Select filter option first"));
     }
-    const transformedData = req.body;
-    if (!transformedData) {
-      next(errorHandler(401, "select filter option first"));
+
+    // Prepare arrays for filter values
+    const carTypes = [];
+    const transmitions = [];
+
+    filters.forEach((cur) => {
+      // if (cur.type === "car_type") {
+      //   const key = Object.keys(cur).find((k) => k !== "type");
+      //   if (key) carTypes.push(key);
+      // }
+      if (cur.type === "transmition") {
+        Object.keys(cur).forEach((k) => {
+          if (k !== "type" && cur[k]) transmitions.push(k);
+        });
+      } else {
+        const key = Object.keys(cur).find((k) => k !== "type");
+        if (key) carTypes.push(key);
+      }
+    });
+
+    // Build WHERE conditions dynamically
+    let whereClauses = [];
+    const values = [];
+
+    if (carTypes.length > 0) {
+      whereClauses.push(`car_type IN (${carTypes.map(() => "?").join(",")})`);
+      values.push(...carTypes);
     }
-    const generateMatchStage = (data) => {
-      const carTypes = [];
-      data.forEach((cur) => {
-        if (cur.type === "car_type") {
-          // Extract the first key of the object and push it into 'cartypes' array
-          const firstKey = Object.keys(cur).find((key) => key !== "type");
-          if (firstKey) {
-            carTypes.push(firstKey);
-          }
-        }
-      });
 
-      const transmitions = [];
-      data.forEach((cur) => {
-        // If the current element has type equal to 'transmition'
-        if (cur.type === "transmition") {
-          // Iterate through each key of the current element
-          Object.keys(cur).forEach((key) => {
-            // Exclude the 'type' key and push only keys with truthy values into 'transmitions' array
-            if (key !== "type" && cur[key]) {
-              transmitions.push(key);
-            }
-          });
-        }
-      });
-
-      return {
-        $match: {
-          $and: [
-            carTypes.length > 0 ? { car_type: { $in: carTypes } } : null,
-            transmitions.length > 0
-              ? { transmition: { $in: transmitions } }
-              : null,
-          ].filter((condition) => condition !== null), // Remove null conditions
-        },
-      };
-    };
-
-    const matchStage = generateMatchStage(transformedData);
-
-    const filteredVehicles = await Vehicle.aggregate([matchStage]);
-    if (!filteredVehicles) {
-      next(errorHandler(401, "no vehicles found"));
-      return;
+    if (transmitions.length > 0) {
+      whereClauses.push(
+        `transmition IN (${transmitions.map(() => "?").join(",")})`
+      );
+      values.push(...transmitions);
     }
+
+    const whereSQL =
+      whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+    const [rows] = await pool.query(
+      `SELECT * FROM vehicles ${whereSQL}`,
+      values
+    );
+
+    if (!rows || rows.length === 0) {
+      return next(errorHandler(404, "No vehicles found"));
+    }
+
     res.status(200).json({
       status: "success",
-      data: {
-        filteredVehicles,
-      },
+      data: { filteredVehicles: rows },
     });
   } catch (error) {
     console.log(error);
-    next(errorHandler(500, "internal server error in fiilterVehicles"));
+    next(errorHandler(500, "Internal server error in filterVehiclesMySQL"));
   }
 };
 

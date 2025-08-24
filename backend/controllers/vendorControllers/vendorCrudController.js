@@ -4,218 +4,251 @@ import vehicle from "../../models/vehicleModel.js";
 import { uploader } from "../../utils/cloudinaryConfig.js";
 import { base64Converter } from "../../utils/multer.js";
 import Vehicle from "../../models/vehicleModel.js";
+import pool from "../../db.js";
 
 // vendor add vehicle
 export const vendorAddVehicle = async (req, res, next) => {
   try {
-    if (!req.body) {
-      return next(errorHandler(500, "body cannot be empty"));
-    }
-    if (!req.files || req.files.length === 0) {
-      return next(errorHandler(500, "image cannot be empty"));
-    }
+    const vendorId = req.user?.id;
+    if (!vendorId) return next(errorHandler(400, "Vendor ID missing"));
 
-    const {
-      registeration_number,
-      company,
-      name,
-      model,
-      title,
-      base_package,
-      price,
-      year_made,
-      fuel_type,
-      description,
-      seat,
-      transmition_type,
-      registeration_end_date,
-      insurance_end_date,
-      polution_end_date,
-      car_type,
-      location,
-      district,
-      addedBy,
-    } = req.body;
+    const vehicleNumber = Date.now(); // e.g. 1738123912938
 
-    const uploadedImages = [];
+    const addedBy = req.user?.id || req.body.addedBy; // from token or request body
+    const uploadedFiles = {
+      images: [],
+      insurance_image: [],
+      rc_book_image: [],
+      pollution_image: [],
+    };
 
-    if (req.files) {
-      //converting the buffer to base64
-      const encodedFiles = base64Converter(req);
+    await Promise.all(
+      Object.keys(req.files).map(async (field) => {
+        const filesArray = req.files[field]; // array of files for this field
 
-      try {
-        //mapping over encoded files and uploading to cloudinary
         await Promise.all(
-          encodedFiles.map(async (cur) => {
-            try {
-              const result = await uploader.upload(cur.data, {
-                public_id: cur.filename,
-              });
-              uploadedImages.push(result.secure_url);
-            } catch (error) {
-              console.log(error, {
-                message: "error while uploading to cloudinary",
-              });
-            }
+          filesArray.map(async (file) => {
+            // iterate each file in that field
+            const folder = `vehicles/vendor-${addedBy}/${vehicleNumber}`;
+
+            const result = await uploader.upload(
+              `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+              {
+                folder: folder,
+                public_id: file.originalname.split(".")[0],
+              }
+            );
+
+            uploadedFiles[field].push(result.secure_url); // push to correct field
           })
         );
-        try {
-          if (uploadedImages.length > 0) {
-            const addVehicle = new vehicle({
-              registeration_number,
-              company,
-              name,
-              image: uploadedImages,
-              model,
-              car_title: title,
-              car_description: description,
-              base_package,
-              price,
-              year_made,
-              fuel_type,
-              seats: seat,
-              transmition: transmition_type,
-              insurance_end: insurance_end_date,
-              registeration_end: registeration_end_date,
-              pollution_end: polution_end_date,
-              car_type,
-              created_at: Date.now(),
-              location,
-              district,
-              isAdminAdded: "false",
-              addedBy: addedBy,
-              isAdminApproved: false,
-            });
+      })
+    );
+    const insertValues = [
+      req.body.registeration_number || null,
+      req.body.company || null,
+      req.body.model || null,
+      req.body.title || null,
+      // req.body.base_package || null,
+      req.body.price || null,
+      req.body.year_made || null,
+      req.body.fuel_type || null,
+      req.body.seat || null,
+      req.body.transmition_type || null,
+      req.body.insurance_end_date || null,
+      req.body.registeration_end_date || null,
+      req.body.polution_end_date || null,
+      req.body.car_type || null,
+      new Date(),
+      req.body.location || null,
+      req.body.district || null,
+      0, // isAdminAdded
+      addedBy || null,
+      0, // isAdminApproved
+      uploadedFiles.images?.[0] || null,
+      uploadedFiles.rc_book_image?.[0] || null,
+      uploadedFiles.insurance_image?.[0] || null,
+      uploadedFiles.pollution_image?.[0] || null,
+    ];
 
-            await addVehicle.save();
-            res.status(200).json({
-              message: "product added to mb & cloudninary successfully",
-            });
-          }
-        } catch (error) {
-          if (error.code === 11000) {
-            return next(errorHandler(409, "product already exists"));
-          }
+    // 5️⃣ Insert into DB (store JSON string of URLs)
+    await pool.execute(
+      `
+  INSERT INTO vehicles 
+  (registeration_number, company, model, car_title, price, year_made, fuel_type, seats, transmition, insurance_end, registeration_end, pollution_end, car_type, created_at, location, district, isAdminAdded, addedBy, isAdminApproved, image, rc_book_image, insurance_image, pollution_image)
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+`,
+      // [
+      //   req.body.registeration_number,
+      //   req.body.company,
+      //   // req.body.name,
+      //   req.body.model,
+      //   req.body.title,
+      //   req.body.base_package,
+      //   req.body.price,
+      //   req.body.year_made,
+      //   req.body.fuel_type,
+      //   req.body.seat,
+      //   req.body.transmition_type,
+      //   req.body.insurance_end_date,
+      //   req.body.registeration_end_date,
+      //   req.body.polution_end_date,
+      //   req.body.car_type,
+      //   new Date(),
+      //   req.body.location,
+      //   req.body.district,
+      //   0, // isAdminAdded false
+      //   addedBy,
+      //   0, // isAdminApproved false
+      //   ...uploadedFiles.images,
+      //   ...uploadedFiles.rc_book_image,
+      //   ...uploadedFiles.insurance_image,
+      //   ...uploadedFiles.pollution_image,
+      // ]
+      insertValues
+    );
+    console.log(insertValues, "insertValues");
 
-          console.log(error);
-          next(errorHandler(500, "product not uploaded"));
-        }
-      } catch (error) {
-        next(errorHandler(500, "could not upload image to cloudinary"));
-      }
-    }
+    res.status(200).json({
+      message: "✅ Vehicle added successfully",
+      folderPath: `vehicles/vendor-${vendorId}/${vehicleNumber}`,
+    });
   } catch (error) {
-    console.log(error)
-    next(errorHandler(400, "vehicle failed to add "));
+    console.error("❌ Error in vendorAddVehicle:", error);
+    next(errorHandler(400, "vehicle failed to add"));
   }
 };
 
 //edit vendorVehicles
 export const vendorEditVehicles = async (req, res, next) => {
   try {
-    //get the id of vehicle to edit through req.params
     const vehicle_id = req.params.id;
 
     if (!vehicle_id) {
-      return next(errorHandler(401, "cannot be empty"));
+      return next(errorHandler(401, "Vehicle ID cannot be empty"));
     }
 
-    if (!req.body || !req.body.formData) {
+    if (!req.body) {
       return next(errorHandler(404, "Add data to edit first"));
     }
 
     const {
+      district,
+      insurance_end_date,
+      year_made,
+      fuel_type,
+      transmition,
+      registeration_end_date,
+      polution_end_date,
+      car_type,
+      location,
+      addedBy,
       registeration_number,
       company,
       name,
       model,
-      title,
+      base_package,
+      price,
+      id,
+      seats,
+    } = req.body;
+    console.log(
+      [
+        district,
+        insurance_end_date,
+        year_made,
+        fuel_type,
+        transmition,
+        registeration_end_date,
+        polution_end_date,
+        car_type,
+        location,
+        addedBy,
+        registeration_number,
+        company,
+        name,
+        model,
+        base_package,
+        price,
+        id,
+        seats,
+      ],
+      "ty"
+    );
+
+    const query = `
+      UPDATE vehicles SET
+        registeration_number = ?, company = ?, name = ?, model = ?, car_title = ?,
+        car_description = ?, base_package = ?, price = ?, year_made = ?, fuel_type = ?,
+        seats = ?, transmition = ?, insurance_end = ?, registeration_end = ?,
+        pollution_end = ?, car_type = ?, updated_at = NOW(), location = ?, district = ?,
+        isAdminApproved = 0, isRejected = 0
+      WHERE id = ?
+    `;
+
+    const values = [
+      registeration_number,
+      company,
+      name,
+      model,
+      "title",
+      "description",
       base_package,
       price,
       year_made,
-      description,
-      Seats,
-      transmitionType,
-      Registeration_end_date,
+      fuel_type,
+      seats,
+      transmition,
       insurance_end_date,
+      registeration_end_date,
       polution_end_date,
-      carType,
-      fuelType,
-      vehicleLocation,
-      vehicleDistrict,
-    } = req.body.formData;
+      car_type,
+      "vehicleLocation",
+      district,
+      vehicle_id,
+    ];
 
-    try {
-      const edited = await Vehicle.findByIdAndUpdate(
-        vehicle_id,
-        {
-          registeration_number,
-          company,
-          name,
-          model,
-          car_title: title,
-          car_description: description,
-          base_package,
-          price,
-          year_made,
-          fuel_type: fuelType,
-          seats: Seats,
-          transmition: transmitionType,
-          insurance_end: insurance_end_date,
-          registeration_end: Registeration_end_date,
-          pollution_end: polution_end_date,
-          car_type: carType,
-          updated_at: Date.now(),
-          location: vehicleLocation,
-          district: vehicleDistrict,
-          //also resetting adminApproval or rejection when editing data so data request is send again
-          isAdminApproved: false,
-          isRejected: false,
-        },
+    const [result] = await pool.execute(query, values);
 
-        { new: true }
-      );
-      if (!edited) {
-        return next(errorHandler(404, "data with this id not found"));
-      }
-
-      res.status(200).json(edited);
-    } catch (error) {
-      if (error.code == 11000 && error.keyPattern && error.keyValue) {
-        const duplicateField = Object.keys(error.keyPattern)[0];
-        const duplicateValue = error.keyValue[duplicateField];
-
-        return next(
-          errorHandler(
-            409,
-            `${duplicateField} '${duplicateValue}' already exists`
-          )
-        );
-      }
+    if (result.affectedRows === 0) {
+      return next(errorHandler(404, "Vehicle with this ID not found"));
     }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Vehicle updated successfully" });
   } catch (error) {
-    console.log(error);
-    next(errorHandler(500, "something went wrong"));
+    // Handle duplicate entry
+    if (error.code === "ER_DUP_ENTRY") {
+      return next(errorHandler(409, "Registration number already exists"));
+    }
+    console.error(error);
+    return next(errorHandler(500, "Something went wrong"));
   }
 };
 
-//delete vendor Vehcile soft delete
 export const vendorDeleteVehicles = async (req, res, next) => {
   try {
     const vehicle_id = req.params.id;
-    const softDeleted = await vehicle.findOneAndUpdate(
-      { _id: vehicle_id },
-      { isDeleted: "true" },
-      { new: true }
-    );
-    if (!softDeleted) {
-      next(errorHandler(400, "vehicle not found"));
-      return;
+
+    // First, check if vehicle exists
+    const [rows] = await pool.execute("SELECT * FROM vehicles WHERE id = ?", [
+      vehicle_id,
+    ]);
+    if (rows.length === 0) {
+      return next(errorHandler(400, "Vehicle not found"));
     }
-    res.status(200).json({ message: "deleted successfully" });
+
+    // Soft delete by updating isDeleted to 'true'
+    await pool.execute("UPDATE vehicles SET isDeleted = ? WHERE id = ?", [
+      1,
+      vehicle_id,
+    ]);
+
+    res.status(200).json({ message: "Deleted successfully  " });
   } catch (error) {
-    console.log(error);
-    next(errorHandler(500, "error while vendorDeleteVehilces"));
+    console.error(error);
+    next(errorHandler(500, "Error while vendorDeleteVehicles"));
   }
 };
 

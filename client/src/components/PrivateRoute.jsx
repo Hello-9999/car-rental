@@ -4,8 +4,7 @@ import { Outlet, Navigate } from "react-router-dom";
 function PrivateRoute() {
   const { currentUser } = useSelector((state) => state.user);
   //i should make a isUser field or this will become so messy in future
-  const isUserOnly =
-    currentUser && !currentUser.isAdmin && !currentUser.isVendor;
+  const isUserOnly = currentUser && !currentUser.isAdmin;
   return isUserOnly ? <Outlet /> : <Navigate to={"/signin"} />;
 }
 
@@ -18,17 +17,9 @@ export const PrivateSignin = () => {
 
   // Check the user's role and redirect accordingly
   if (currentUser.isAdmin) {
-
     return <Navigate to="/adminDashboard" />;
-
-  } else if (currentUser.isVendor) {
-
-    return <Navigate to="/vendorDashboard" />;
-
   } else {
-
     return <Navigate to="/" />;
-    
   }
 };
 

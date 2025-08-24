@@ -11,7 +11,9 @@ import OAuth from "../../components/OAuth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useEffect } from "react";
 const schema = z.object({
   email: z
     .string()
@@ -52,6 +54,8 @@ const schema = z.object({
 // }
 
 function SignIn() {
+  const { currentUser } = useSelector((state) => state.user);
+
   const {
     register,
     handleSubmit,
@@ -66,51 +70,53 @@ function SignIn() {
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await fetch(
-        `${import.meta.env.VITE_PRODUCTION_BACKEND_URL}/api/auth/signin`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
-      const data = await res.json();
 
-      console.log(typeof data.isAdmin, "data");
+      const res = await axios.post(
+        `${import.meta.env.VITE_PRODUCTION_BACKEND_URL}/api/auth/signin`,
+        formData,
+        { withCredentials: true }
+      );
+
+      const data = res.data;
+
       if (data?.accessToken) {
-        localStorage.removeItem("accessToken");
         localStorage.setItem("accessToken", data.accessToken);
       }
       if (data?.refreshToken) {
-        localStorage.removeItem("refreshToken");
         localStorage.setItem("refreshToken", data.refreshToken);
       }
 
-      if (data.succes === false || !res.ok) {
-        dispatch(loadingEnd());
-        dispatch(signInFailure(data));
+      console.log(data, "data");
 
-        return;
-      }
       if (data.isAdmin == 1) {
+        toast.success(data?.msg);
         dispatch(signInSuccess(data));
-        dispatch(loadingEnd());
-        navigate("/adminDashboard");
+        navigate("/adminDashboard"); // navigate after updating state
       } else if (data.isUser == 1) {
+        toast.success(data?.msg);
         dispatch(signInSuccess(data));
-        dispatch(loadingEnd());
-        navigate("/");
+        // navigate("/") if needed
       } else {
-        dispatch(loadingEnd());
+        toast.error(data?.msg || "Something went Wrong !");
         dispatch(signInFailure(data));
       }
-      dispatch(loadingEnd());
-      dispatch(signInFailure("something went wrong"));
     } catch (error) {
+      console.log(error, "errr");
+      const errMsg = error?.response?.data?.msg;
+      toast.error(errMsg || "Something went Wrong !");
+      dispatch(signInFailure(errMsg));
+    } finally {
       dispatch(loadingEnd());
-      dispatch(signInFailure(error));
     }
   };
+  useEffect(() => {
+    if (currentUser?.isAdmin) {
+      console.log(adminDashboard, "adminDashboard");
+      navigate("/adminDashboard");
+    } else if (currentUser?.isUser) {
+      navigate("/"); // normal user
+    }
+  }, [currentUser, navigate]);
 
   return (
     <>
@@ -179,11 +185,13 @@ function SignIn() {
             </div>
 
             <p className="text-[10px] text-red-600">
-              {isError ? isError.message || "something went wrong" : " "}
+              {/* {isError
+                ? toast.error(isError.message || "something went wrong")
+                : " "} */}
             </p>
           </div>
         </form>
-        <div>
+        {/* <div>
           <h3 className="text-center text-slate-700 pt-3 pb-3 text-[10px]">
             OR
           </h3>
@@ -196,7 +204,7 @@ function SignIn() {
           </div>
 
           <OAuth />
-        </div>
+        </div> */}
       </div>
     </>
   );

@@ -5,6 +5,9 @@ import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import adminRoute from "./routes/adminRoute.js";
 import vendorRoute from "./routes/venderRoute.js";
+import bookingRoute from "./routes/booking.js";
+import paymentRoutes from "./routes/payment.js";
+
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { cloudinaryConfig } from "./utils/cloudinaryConfig.js";
@@ -27,14 +30,14 @@ App.listen(port, () => {
 });
 
 const allowedOrigins = [
-  "https://rent-a-ride-two.vercel.app",
+  // "https://rent-a-ride-two.vercel.app",
   "http://localhost:5173",
 ]; // Add allowed origins here
 
 App.use(
   cors({
     origin: allowedOrigins,
-    methods: ["GET", "PUT", "POST", "PATCH", "DELETE"],
+    // methods: ["GET", "PUT", "POST", "PATCH", "DELETE"],
     credentials: true, // Enables the Access-Control-Allow-Credentials header
   })
 );
@@ -47,6 +50,11 @@ App.use("/api/user", userRoute);
 App.use("/api/auth", authRoute);
 App.use("/api/admin", adminRoute);
 App.use("/api/vendor", vendorRoute);
+App.use("/api/booking", bookingRoute);
+App.use("/api/payment", paymentRoutes);
+// App.use("/api/payment", vendorRoute);
+// app.use("/api/initiate-payment", initiatePaymentRoute);
+// App.use("/api/initiate-payment");
 
 App.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

@@ -7,14 +7,13 @@ import { MdMenuOpen } from "react-icons/md";
 import { useState } from "react";
 import { Drawer } from "antd";
 
-
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
   const [nav, setNav] = useState(false);
 
   return (
     <div
-      className={`w-full   flex justify-between items-center px-6 sm:px-12 md:px-18 lg:py-6 lg:px-28 pt-10 mt-5 md:mt-10 sm:max-w-[900px] lg:max-w-[1500px] mx-auto `}
+      className={`w-full   flex justify-between items-center px-6 sm:px-12 md:px-18 lg:py-6 lg:px-28 pt-10   sm:max-w-[900px] lg:max-w-[1500px] mx-auto `}
     >
       <Link to="/">
         <div
@@ -33,7 +32,7 @@ function Header() {
             >
               <Link
                 to={navlink.path}
-                className={`text-black  font-poppins cursor-pointer font-semibold`}
+                className={`block py-2 px-3 text-white bg-black rounded cursor-pointer font-semibold font-poppins md:bg-transparent md:text-black md:p-0 md:dark:text-black`}
               >
                 {navlink.title}
               </Link>
@@ -44,7 +43,7 @@ function Header() {
       <div className="flex gap-2">
         <div className="hidden md:inline-flex">
           <Link to={"/signIn"}>
-            {currentUser && !currentUser.isAdmin && !currentUser.isVendor ? (
+            {currentUser && !currentUser.isAdmin ? (
               ""
             ) : (
               <button
@@ -57,8 +56,11 @@ function Header() {
           </Link>
         </div>
         <div className="hidden lg:flex items-center justify-center">
-          {currentUser && !currentUser.isAdmin && !currentUser.isVendor ? (
-            <Link to={"/profile"}>
+          {currentUser && !currentUser.isAdmin ? (
+            <Link
+              to={"/profile"}
+              className="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full  md:me-0   dark:text-white"
+            >
               <img
                 src={`${currentUser.profilePicture}`}
                 alt="fsd"
@@ -77,7 +79,6 @@ function Header() {
           )}
         </div>
 
-
         {/*  Mobile Menu */}
         <div className="relative lg:hidden flex justify-center items-center">
           <button onClick={() => setNav(!nav)}>
@@ -90,22 +91,23 @@ function Header() {
           >
             <div className="flex flex-col items-start justify-between gap-y-10">
               {navLinks.map((navlink, index) => (
-            
-                  <Link
-                    key={index}
-                    to={navlink.path}
-                    className="text-[26px]"
-                    onClick={() => setNav(false)}
-                  >
-                    {navlink.title}
-                  </Link>
-              
+                <Link
+                  key={index}
+                  to={navlink.path}
+                  className="text-[26px]"
+                  onClick={() => setNav(false)}
+                >
+                  {navlink.title}
+                </Link>
               ))}
 
-              {currentUser && !currentUser.isAdmin && !currentUser.isVendor && (
+              {currentUser && !currentUser.isAdmin && (
                 <div>
                   <Link to={"/profile"}>
-                    <div id="signup" className={` rounded-md font-semibold text-[24px]`}>
+                    <div
+                      id="signup"
+                      className={` rounded-md font-semibold text-[24px]`}
+                    >
                       Profile
                     </div>
                   </Link>
@@ -114,9 +116,7 @@ function Header() {
 
               <div>
                 <Link to={"/signIn"}>
-                  {currentUser &&
-                  !currentUser.isAdmin &&
-                  !currentUser.isVendor ? (
+                  {currentUser && !currentUser.isAdmin ? (
                     ""
                   ) : (
                     <button
@@ -130,9 +130,7 @@ function Header() {
               </div>
 
               <div>
-                {currentUser &&
-                !currentUser.isAdmin &&
-                !currentUser.isVendor ? (
+                {currentUser && !currentUser.isAdmin ? (
                   ""
                 ) : (
                   <div>
@@ -153,9 +151,7 @@ function Header() {
             <div>
               <div className="absolute top-6 z-10 right-0  ">
                 <Link to={"/signIn"}>
-                  {currentUser &&
-                  !currentUser.isAdmin &&
-                  !currentUser.isVendor ? (
+                  {currentUser && !currentUser.isAdmin ? (
                     ""
                   ) : (
                     <button
@@ -169,17 +165,15 @@ function Header() {
               </div>
 
               <div>
-                {currentUser &&
-                  !currentUser.isAdmin &&
-                  !currentUser.isVendor && (
-                    <div className="hidden lg:inline-flex">
-                      <Link to={"/signup"}>
-                        <button id="signup" className={`${styles.button} `}>
-                          Sign Up
-                        </button>
-                      </Link>
-                    </div>
-                  )}
+                {currentUser && !currentUser.isAdmin && (
+                  <div className="hidden lg:inline-flex">
+                    <Link to={"/signup"}>
+                      <button id="signup" className={`${styles.button} `}>
+                        Sign Up
+                      </button>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           )}

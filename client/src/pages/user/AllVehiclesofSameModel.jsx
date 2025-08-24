@@ -17,7 +17,6 @@ const AllVehiclesofSameModel = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-
   useEffect(() => {
     // Set variant mode to true when all variants are available
     if (allVariants) {
@@ -41,14 +40,17 @@ const AllVehiclesofSameModel = () => {
           </div>
 
           {filterdData && filterdData.length > 0 ? (
-          <div
-            className=" mx-auto flex sm:flex-row  w-full  lg:grid lg:max-w-[1000px]  lg:grid-cols-3 justify-center items-center gap-5 
+            <div
+              className=" mx-auto flex sm:flex-row  w-full  lg:grid lg:max-w-[1000px]  lg:grid-cols-3 justify-center items-center gap-5 
     flex-wrap mt-10"
-          >
-            
+            >
               {filterdData.map(
                 (cur, idx) =>
-                  cur.isDeleted === "false" && (
+                  cur.isDeleted === "false" &&
+                  console.log(
+                    cur,
+                    "cur"
+                  )(
                     <div
                       className="bg-white box-shadow rounded-lg  drop-shadow "
                       key={idx}
@@ -56,9 +58,17 @@ const AllVehiclesofSameModel = () => {
                       <div className="mx-auto max-w-[320px] px-4 py-2 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
                         <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden object-contain rounded-md bg-white lg:aspect-none group-hover:opacity-75 lg:h-80 mb-3">
                           <img
-                            src={`${cur.image[0]}`}
-                            alt={`cur.name`}
-                            className=" w-full object-contain object-center lg:h-full lg:w-full"
+                            src={cur.image[0]}
+                            alt={cur.name}
+                            className="
+    w-full h-64 sm:h-72 md:h-80 lg:h-full 
+    object-contain object-center 
+    rounded-lg 
+    shadow-md 
+    transition-transform duration-300 
+    hover:scale-105 
+     
+  "
                           />
                         </div>
                         <div className="flex justify-between items-start">
@@ -131,18 +141,16 @@ const AllVehiclesofSameModel = () => {
                     </div>
                   )
               )}
-              </div>
-            ) 
-            : (
-              <div className="max-w-[400px] flex flex-col justify-center gap-y-4 items-center mx-auto mt-10">
-                <img
-                  src="https://d310a92p0we78s.cloudfront.net/illustration/premium/additional-file/2829991/1.svg?token=eyJhbGciOiJoczI1NiIsImtpZCI6ImRlZmF1bHQifQ__.eyJpc3MiOiJkMzEwYTkycDB3ZTc4cy5jbG91ZGZyb250Lm5ldCIsImV4cCI6MTcxNTY4Nzk0MiwicSI6bnVsbCwiaWF0IjoxNzE1NDI4NzQyfQ__.d4e4b015139247a901a11eeb00ef35e524acf56eaf251e07c1c468a9ebdf089e"
-                  alt=""
-                />
-                <p className="text-md font-bold">No car found </p>
-              </div>
-            )}
-          
+            </div>
+          ) : (
+            <div className="max-w-[400px] flex flex-col justify-center gap-y-4 items-center mx-auto mt-10">
+              <img
+                src="https://d310a92p0we78s.cloudfront.net/illustration/premium/additional-file/2829991/1.svg?token=eyJhbGciOiJoczI1NiIsImtpZCI6ImRlZmF1bHQifQ__.eyJpc3MiOiJkMzEwYTkycDB3ZTc4cy5jbG91ZGZyb250Lm5ldCIsImV4cCI6MTcxNTY4Nzk0MiwicSI6bnVsbCwiaWF0IjoxNzE1NDI4NzQyfQ__.d4e4b015139247a901a11eeb00ef35e524acf56eaf251e07c1c468a9ebdf089e"
+                alt=""
+              />
+              <p className="text-md font-bold">No car found </p>
+            </div>
+          )}
 
           {!allVariants || (allVariants.length == 0 && <CarNotFound />)}
         </div>

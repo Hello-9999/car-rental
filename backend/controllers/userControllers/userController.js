@@ -1,12 +1,11 @@
 import User from "../../models/userModel.js";
 import { errorHandler } from "../../utils/error.js";
 import bcryptjs from "bcryptjs";
-
+import pool from "../../db.js";
 
 //update user
 
 export const updateUser = async (req, res, next) => {
-  
   if (req.user.id !== req.params.id) {
     return next(errorHandler(401, "you can only update your account"));
   }
@@ -33,6 +32,21 @@ export const updateUser = async (req, res, next) => {
     next(error);
   }
 };
+export const getUser = async (req, res, next) => {
+  try {
+    const [results] = await pool.query("SELECT * FROM users");
+
+    console.log(results, "te");
+    if (results.length === 0) {
+      return next(errorHandler(404, "no users found"));
+    }
+
+    res.json(results);
+  } catch (error) {
+    console.log(error);
+    next(errorHandler(500, "something went wrong"));
+  }
+};
 
 //delete user
 
@@ -51,18 +65,14 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
+//signOut
 
-//signOut 
-
-export const signOut = async(req,res,next)=> {
-  try{
+export const signOut = async (req, res, next) => {
+  try {
     // res.clearCookie('access_token','refresh_token')
-    res.status(200).json({message:"signedOut successfully"})
+    res.status(200).json({ message: "signedOut successfully" });
+  } catch (error) {
+    console.log(error);
+    next(errorHandler(500, "error in signout controller"));
   }
-  catch(error){
-   console.log(error)
-   next(errorHandler(500,'error in signout controller'))
-  }
-
-}
-
+};

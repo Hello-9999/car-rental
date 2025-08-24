@@ -24,51 +24,59 @@ function AllVehicles() {
     useSelector((state) => state.statusSlice);
 
   //show vehicles
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        const res = await fetch(
-          `${
-            import.meta.env.VITE_PRODUCTION_BACKEND_URL
-          }/api/admin/showVehicles`,
-          {
-            method: "GET",
-          }
-        );
-
-        console.log(res, "res");
-        if (res.ok) {
-          const data = await res.json();
-          console.log(data, "data");
-          setVehicles(data);
-          dispatch(showVehicles(data));
+  const fetchVehicles = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_PRODUCTION_BACKEND_URL}/api/admin/showVehicles`,
+        {
+          method: "GET",
         }
-      } catch (error) {
-        console.log(error);
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log(data, "data");
+        setVehicles(data);
+        dispatch(showVehicles(data));
       }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
     fetchVehicles();
   }, [isAddVehicleClicked]);
 
   //delete a vehicle
   const handleDelete = async (vehicle_id) => {
     try {
-      setVehicles(allVehicles.filter((cur) => cur._id !== vehicle_id));
-      const res = await fetch(`/api/admin/deleteVehicle/${vehicle_id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        toast.success("deleted", {
-          duration: 800,
-
-          style: {
-            color: "white",
-            background: "#c48080",
+      const res = await fetch(
+        `${
+          import.meta.env.VITE_PRODUCTION_BACKEND_URL
+        }/api/admin/deleteVehicle/${vehicle_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
           },
+        }
+      );
+
+      const data = await res.json(); // parse JSON body
+      console.log(data); // { message: "Deleted successfully" }
+      console.log(res);
+      if (res.ok) {
+        toast.success(data.message, {
+          duration: 800,
+          style: { color: "white", background: "#c48080" },
         });
+
+        // Optionally refresh the list or remove the deleted vehicle from state
+        setVehicles(allVehicles.filter((cur) => cur.id !== vehicle_id));
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      toast.error("Something went wrong!");
     }
   };
 
@@ -101,18 +109,23 @@ function AllVehicles() {
       headerName: "Register Number",
       width: 150,
     },
-    { field: "company", headerName: "Company", width: 150 },
-    { field: "name", headerName: "Name", width: 150 },
     {
-      field: "edit",
-      headerName: "Edit",
-      width: 100,
-      renderCell: (params) => (
-        <Button onClick={() => handleEditVehicle(params.row.id)}>
-          <ModeEditOutlineIcon />
-        </Button>
-      ),
+      field: "title",
+      headerName: "Title",
+      width: 150,
     },
+    { field: "company", headerName: "Company", width: 150 },
+    // { field: "name", headerName: "Name", width: 150 },
+    // {
+    //   field: "edit",
+    //   headerName: "Edit",
+    //   width: 100,
+    //   renderCell: (params) => (
+    //     <Button onClick={() => handleEditVehicle(params.row.id)}>
+    //       <ModeEditOutlineIcon />
+    //     </Button>
+    //   ),
+    // },
     {
       field: "delete",
       headerName: "Delete",
@@ -127,10 +140,10 @@ function AllVehicles() {
 
   const rows = allVehicles.map((vehicle) => ({
     id: vehicle.id,
-    // image: vehicle.image[0],
+    image: vehicle.image,
     registeration_number: vehicle.registeration_number,
     company: vehicle.company,
-    name: vehicle.name,
+    title: vehicle.car_title,
   }));
 
   console.log(rows, "rows");
@@ -171,7 +184,7 @@ function AllVehicles() {
       {adminCrudError ? <Toaster /> : ""}
 
       <div className="max-w-[1000px]  d-flex   justify-end text-start items-end p-10">
-        <Header title="AllVehicles" />
+        <Header title="All Vehicles" />
         <Box sx={{ height: "100%", width: "100%" }}>
           <DataGrid
             rows={rows}
