@@ -6,6 +6,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { MdMenuOpen } from "react-icons/md";
 import { useState } from "react";
 import { Drawer } from "antd";
+import carLogo from "../Assets/car-logo.png";
 
 function Header() {
   const { currentUser } = useSelector((state) => state.user);
@@ -13,13 +14,20 @@ function Header() {
 
   return (
     <div
-      className={`w-full   flex justify-between items-center px-6 sm:px-12 md:px-18 lg:py-6 lg:px-28 pt-10   sm:max-w-[900px] lg:max-w-[1500px] mx-auto `}
+      className={`w-full   flex justify-between items-center   px-2   py-3      bg-[#222733]`}
     >
       <Link to="/">
-        <div
-          className={` text-[16px] md:text-[18px] lg:text-[20px] font-poppins font-bold`}
-        >
-          Rent a Ride
+        <div className="p-[2px]  ">
+          <div className=" ">
+            <div className="text-[18px] md:text-[20px] lg:text-[25px] font-poppins font-bold bg-gradient-to-br from-green-600 to-white bg-clip-text text-transparent     py-3 ">
+              <span>Rent a Ride</span>
+            </div>
+            {/* <img
+              src={carLogo}
+              alt="Logo"
+              className="w-[90px]  object-cover  "
+            /> */}
+          </div>
         </div>
       </Link>
 
@@ -32,7 +40,7 @@ function Header() {
             >
               <Link
                 to={navlink.path}
-                className={`block py-2 px-3 text-white bg-black rounded cursor-pointer font-semibold font-poppins md:bg-transparent md:text-black md:p-0 md:dark:text-black`}
+                className={`block py-2 px-3 text-white   rounded cursor-pointer font-semibold font-poppins    md:p-0 `}
               >
                 {navlink.title}
               </Link>

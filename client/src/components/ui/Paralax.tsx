@@ -98,7 +98,7 @@ export const HeroParallax = () => {
         ref={ref}
         className="h-full py-40 overflow-hidden mb-[200px]  antialiased relative flex flex-col self-auto [perspective:1000px]  [transform-style:preserve-3d] "
       >
-        <Header />
+        {/* <Header /> */}
         <motion.div
           style={{
             rotateX,

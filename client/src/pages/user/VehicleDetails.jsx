@@ -84,7 +84,6 @@ const VehicleDetails = () => {
     }
   };
 
-  console.log(singleVehicleDetail, "singleVehicleDetail");
   return (
     <div className="bg-white">
       <section className="py-12 lg:py-16">
@@ -117,13 +116,13 @@ const VehicleDetails = () => {
             </div>
 
             {/* Vehicle Details */}
-            <div className="lg:col-span-2 bg-slate-50 rounded-lg p-6 flex flex-col justify-between min-h-[500px]">
+            <div className="lg:col-span-2 bg-slate-200 rounded-lg p-6 flex flex-col justify-between min-h-[500px]">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold capitalize text-gray-900">
                   {singleVehicleDetail?.name}
                 </h1>
 
-                <div className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-800 font-mono">
+                <div className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-800  ">
                   {[
                     {
                       icon: <FaCarAlt />,
@@ -187,10 +186,15 @@ const VehicleDetails = () => {
 
               {/* Price & Book Button */}
               <div className="mt-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <div className="flex items-end text-3xl font-bold gap-1">
-                  <FaIndianRupeeSign className="text-xl" />
-                  <span>{singleVehicleDetail?.price}</span>
-                  <span className="text-base font-normal">/Day</span>
+                <div className="flex items-end text-3xl font-semibold gap-1">
+                  {/* <FaIndianRupeeSign className="text-xl" /> */}
+                  Rs.
+                  <span className="font-normal">
+                    {singleVehicleDetail?.price}
+                  </span>
+                  <span className="text-base font-normal">
+                    <span className="font-bold"> / </span>Day
+                  </span>
                 </div>
                 <button
                   onClick={() =>
@@ -201,7 +205,7 @@ const VehicleDetails = () => {
                       singleVehicleDetail
                     )
                   }
-                  className="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white font-bold rounded-md hover:bg-gray-800 transition flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3 bg-green-500 text-black font-bold rounded-md hover:bg-green-800 transition flex items-center justify-center gap-2"
                 >
                   <GrSecure />
                   Book Ride
