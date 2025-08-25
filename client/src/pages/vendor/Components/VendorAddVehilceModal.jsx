@@ -232,7 +232,8 @@ const VendorAddProductModal = () => {
                   id="price"
                   type="number"
                   label="Price Per Day"
-                  {...register("price")}
+                  inputProps={{ min: 1000 }}
+                  {...register("price", { min: 1000 })}
                 />
                 {/* <TextField
                   required
