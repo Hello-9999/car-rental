@@ -86,10 +86,7 @@ function Home() {
             <div className=" mt-10  lg:mt-[40px] flex gap-3">
               <button
                 onClick={() => {
-                  ref.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
+                  navigate("/vehicles");
                 }}
                 className="bg-green-500  text-black text-[12px] md:text-[16px] py-3 px-3 rounded-sm font-semibold  lg:py-3 lg:px-5"
               >
@@ -98,7 +95,7 @@ function Home() {
                   <i className="bi bi-check-circle-fill"></i>
                 </span>
               </button>
-              <button
+              {/* <button
                 onClick={() => {
                   ref.current?.scrollIntoView({
                     behavior: "smooth",
@@ -111,7 +108,7 @@ function Home() {
                 <span>
                   <i className="bi bi-chevron-right"></i>
                 </span>
-              </button>
+              </button> */}
             </div>
           </div>
           <div className="object-contain hidden sm:block">
