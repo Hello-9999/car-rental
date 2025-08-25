@@ -63,17 +63,11 @@ function AllVehicles() {
       );
 
       const data = await res.json(); // parse JSON body
-      console.log(data); // { message: "Deleted successfully" }
-      console.log(res);
-      if (res.ok) {
-        toast.success(data.message, {
-          duration: 800,
-          style: { color: "white", background: "#c48080" },
-        });
-
-        // Optionally refresh the list or remove the deleted vehicle from state
-        setVehicles(allVehicles.filter((cur) => cur.id !== vehicle_id));
-      }
+      // { message: "Deleted successfully" }
+      toast.success(data.message, {
+        style: { color: "white", background: "#c48080" },
+      });
+      setVehicles(allVehicles.filter((cur) => cur.id !== vehicle_id));
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong!");

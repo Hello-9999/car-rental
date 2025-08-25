@@ -97,7 +97,7 @@ const VendorAddProductModal = () => {
     formData.append("polution_end_date", addData.polution_end_date);
     formData.append("car_type", addData.carType);
     formData.append("location", addData.vehicleLocation);
-    formData.append("district", addData.vehicleDistrict);
+    formData.append("district", "kathmandu");
     formData.append("addedBy", id);
 
     // let tostID = toast.loading("Saving...", { position: "bottom-center" });
