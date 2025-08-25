@@ -84,11 +84,11 @@ const VendorAddProductModal = () => {
 
     // formData.append("name", addData?.name);
     formData.append("model", addData?.model);
-    formData.append("title", addData.title);
+    formData.append("title", " ");
     // formData.append("base_package", addData.base_package);
     formData.append("price", addData.price);
     // formData.append("description", addData.description);
-    formData.append("year_made", addData.year_made);
+    formData.append("year_made", " ");
     formData.append("fuel_type", addData.fuelType);
     formData.append("seat", addData.seats);
     formData.append("transmition_type", addData.transmitionType);
@@ -222,7 +222,7 @@ const VendorAddProductModal = () => {
                   label="Model"
                   {...register("model")}
                 />
-                <TextField id="title" label="Title" {...register("title")} />
+                {/* <TextField id="title" label="Title" {...register("title")} /> */}
                 {/* <TextField
                   id="base_package"
                   label="Base Package"
@@ -231,16 +231,16 @@ const VendorAddProductModal = () => {
                 <TextField
                   id="price"
                   type="number"
-                  label="Price"
+                  label="Price Per Day"
                   {...register("price")}
                 />
-                <TextField
+                {/* <TextField
                   required
                   id="year_made"
                   type="number"
                   label="Year Made"
                   {...register("year_made")}
-                />
+                /> */}
                 <Controller
                   control={control}
                   name="fuelType"
@@ -337,7 +337,7 @@ const VendorAddProductModal = () => {
                   )}
                 />
 
-                <Controller
+                {/* <Controller
                   control={control}
                   name="vehicleDistrict"
                   render={({ field }) => (
@@ -355,7 +355,7 @@ const VendorAddProductModal = () => {
                       ))}
                     </TextField>
                   )}
-                />
+                /> */}
               </div>
 
               {/* Section 3: Dates */}
