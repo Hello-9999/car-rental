@@ -351,10 +351,9 @@ export const deleteVehicle = async (req, res, next) => {
       return res.status(400).json({ message: "Vehicle ID is required" });
     }
 
-    const [result] = await pool.execute(
-      "UPDATE vehicles SET isDeleted = 1 WHERE id = ?",
-      [vehicle_id]
-    );
+    const [result] = await pool.execute("DELETE FROM vehicles WHERE id = ?", [
+      vehicle_id,
+    ]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Vehicle not found" });
